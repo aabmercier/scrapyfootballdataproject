@@ -3,12 +3,14 @@ from scrapy.selector import Selector
 
 from dirbot.items import Website
 
+from scrapy.http import Response
 
 class DmozSpider(Spider):
     name = "dmoz"
     #allowed_domains = ["dmoz.org"]
     start_urls = [
-        "http://www.lequipe.fr/Football/FootballFicheClub77.html",
+        #"http://www.lequipe.fr/Football/",
+        "http://www.lequipe.fr/Football/EQ_ANG.html"
     ]
 
     def parse(self, response):
@@ -19,24 +21,27 @@ class DmozSpider(Spider):
         @url http://www.dmoz.org/Computers/Programming/Languages/Python/Resources/
         @scrapes name
         """
-        sel = Selector(response)
-        #sites = sel.xpath('//table//tr/td')
+        
         items = []
 
-        #item['country'] = sel.xpath('/body/div/div/section/div/div/div/table//tr/td/span/text()').extract()
 
-        #for i in range(0,1):
-        
-        
+        urls = response.selector.xpath('//div[@id="container"]/div[@id="col-gauche"]/section/div[2]/ul/li/div[@class="club-left"]/a/@href').extract()
 
-        for i in range(0,len(sel.xpath('.//table[@id="club_effectif_club"]//tr/td/a/text()').extract())):
-            item = Website()
-            item['name'] = sel.xpath('//table[@id="club_effectif_club"]//tr/td/a/text()').extract()[i]
-            item['country'] = sel.xpath('//table[@id="club_effectif_club"]//tr/td[span][1]/text()').extract()[2*i+1]
-            item['club'] = sel.xpath('.//body/@club').extract()
-            items.append(item)
+        for i in range(0,len(urls)):
+            urls[i] = 'http://www.lequipe.fr'.join(urls[i].encode('utf8'))
 
+
+
+            
+        for i in range(0,len(urls)):
+            res = Response(url = urls[i])
+            for i in range(0,len(Selector(response = res).xpath('.//table[@id="club_effectif_club"]//tr/td/a/text()').extract())):
+                item = Website()
+                item['name'] = res.selector.xpath('//table[@id="club_effectif_club"]//tr/td/a/text()').extract()[i]
+                item['country'] = res.selector.xpath('//table[@id="club_effectif_club"]//tr/td[span][1]/text()').extract()[2*i+1]
+                item['club'] = res.selector.xpath('.//body/@club').extract()
+                items.append(item)
 
         return items
 
-#http://www.lequipe.fr/Football/FootballFicheClub71.html/body/div[5]/div[2]/section[3]/div[1]/div/div[2]/table//tr[1]/td[2]
+
