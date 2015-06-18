@@ -29,10 +29,11 @@ class DmozSpider(Spider):
         
         
 
-        for i in range(0,len(sel.xpath('//table[@id="club_effectif_club"]//tr/td/a/text()').extract())):
+        for i in range(0,len(sel.xpath('.//table[@id="club_effectif_club"]//tr/td/a/text()').extract())):
             item = Website()
             item['name'] = sel.xpath('//table[@id="club_effectif_club"]//tr/td/a/text()').extract()[i]
             item['country'] = sel.xpath('//table[@id="club_effectif_club"]//tr/td[span][1]/text()').extract()[2*i+1]
+            item['club'] = sel.xpath('.//body/@club').extract()
             items.append(item)
 
 
